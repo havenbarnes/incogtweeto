@@ -7,6 +7,8 @@ const main = async () => {
 	console.log('Followers', followers);
 	const following = await client.getFollowing(username);
 	console.log('Following', following);
+	const user = await client.getUser(following[0]);
+	console.log('Example user', user);
 };
 
 main();
