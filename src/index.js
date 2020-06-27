@@ -1,14 +1,20 @@
 import TwitterClient from './twitter-client.js';
 
-const main = async () => {
-	const client = new TwitterClient();
-	const username = process.env.TWITTER_USER;
+const client = new TwitterClient();
+
+const getNLeastFollowedFollowers = async (username, N) => {
 	const followers = await client.getFollowers(username);
-	console.log('Followers', followers);
-	const following = await client.getFollowing(username);
-	console.log('Following', following);
-	const user = await client.getUser(following[0]);
-	console.log('Example user', user);
+	const userPromises = followers.map(async (id) => {
+		const user = await client.getUser(id);
+		return user;
+	});
+	const users = await Promise.all(userPromises);
+	console.log(users[0]);
+};
+
+const main = async () => {
+	const username = process.env.TWITTER_USER;
+	const tenFollowers = await getNLeastFollowedFollowers(username, 10);
 };
 
 main();

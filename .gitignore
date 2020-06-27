@@ -1,4 +1,4 @@
 node_modules
-
+store.json
 yarn-debug.log*
 yarn-error.log*

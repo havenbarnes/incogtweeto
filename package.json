@@ -52,6 +52,7 @@
 		"prettier": "^2.0.4"
 	},
 	"dependencies": {
+		"node-file-cache": "^1.0.2",
 		"twitter-lite": "^0.14.0"
 	}
 }
