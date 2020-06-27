@@ -13,8 +13,8 @@ export default class TwitterClient {
 	constructor() {
 		this.twit = new Twitter(twitterConfig);
 		this.cache = cache.create({ life: 7200 });
-		this.listThrottle = throttledQueue(1, 60000);
-		this.userThrottle = throttledQueue(1, 1000);
+		this.listThrottle = throttledQueue(1, 61000);
+		this.userThrottle = throttledQueue(1, 1200);
 	}
 
 	async getFollowers(username) {
@@ -78,6 +78,7 @@ export default class TwitterClient {
 				});
 			});
 			user = formatTwitterUser(user);
+			console.log(`Fetched ${userId} user`);
 			this.cache.set(cacheKey, user);
 			return user;
 		} catch (error) {
