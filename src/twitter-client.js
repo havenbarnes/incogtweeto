@@ -24,7 +24,7 @@ export default class TwitterClient {
 			return this.cache.get(cacheKey);
 		}
 
-		console.log('Queueing request to grab friends of ', username);
+		console.log(`Queueing request to grab friends of ${username}`);
 		const friends = await new Promise((resolve, reject) => {
 			this.listThrottle(async () => {
 				try {
