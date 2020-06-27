@@ -34,12 +34,18 @@ const main = async () => {
 	// Get everyone who <username> follows
 	const friends = await client.getFriends(username);
 	// Get the 10 least-followed people they follow
-	const specialFriends = await getNLeastFollowedFriends(friends, 25, 500);
+	const specialFriends = await getNLeastFollowedFriends(friends, 5, 500);
+	let candidates = [...specialFriends];
 	// then grab nested special friends of these special friends, put them all in a big list together
+	specialFriends.forEach(async (f) => {
+		const fFriends = await client.getFriends(f.username);
+		const fSpecialFriends = await getNLeastFollowedFriends(fFriends, 5, 500);
+		candidates = [...fSpecialFriends, ...candidates];
+	});
 
 	// See which people the special frineds follow
 	const potentialWinners = await Promise.all(
-		specialFriends.map(async (user) => {
+		candidates.map(async (user) => {
 			const userFriends = await client.getFriends(user.username);
 			return {
 				username: user.username,
