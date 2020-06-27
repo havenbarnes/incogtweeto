@@ -4,7 +4,8 @@ const client = new TwitterClient();
 
 const getNLeastFollowedFriends = async (friends, N, maxFollowers) => {
 	const userPromises = friends.map(async (id) => {
-		return await client.getUser(id);
+		const user = await client.getUser(id);
+		return user;
 	});
 	let users = await Promise.all(userPromises);
 	users = users.sort((a, b) => a.followers - b.followers);
@@ -34,16 +35,16 @@ const main = async () => {
 	// Get everyone who <username> follows
 	const friends = await client.getFriends(username);
 	// Get the 10 least-followed people they follow
-	const specialFriends = await getNLeastFollowedFriends(friends, 5, 500);
+	const specialFriends = await getNLeastFollowedFriends(friends, 10, 300);
 	let candidates = [...specialFriends];
 	// then grab nested special friends of these special friends, put them all in a big list together
-	specialFriends.forEach(async (f) => {
+	for (const f of specialFriends) {
 		const fFriends = await client.getFriends(f.username);
-		const fSpecialFriends = await getNLeastFollowedFriends(fFriends, 5, 500);
+		const fSpecialFriends = await getNLeastFollowedFriends(fFriends, 10, 300);
 		candidates = [...fSpecialFriends, ...candidates];
-	});
+	}
 
-	// See which people the special frineds follow
+	// See which people the special friends follow
 	const potentialWinners = await Promise.all(
 		candidates.map(async (user) => {
 			const userFriends = await client.getFriends(user.username);

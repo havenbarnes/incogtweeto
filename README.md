@@ -3,7 +3,7 @@
 ## Usage
 
 ```bash
-yarn start TWITTER_USER=<username>
+TWITTER_USER=<username> yarn start
 ```
 
 ## License
