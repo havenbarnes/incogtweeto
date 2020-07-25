@@ -17,6 +17,31 @@ export default class TwitterClient {
 		this.userThrottle = throttledQueue(1, 1200);
 	}
 
+	async getFollowers(username) {
+		const cacheKey = `${CACHE_KEY_PREFIXES.GET_FOLLOWERS_IDS}/${username}`;
+		if (!!this.cache.get(cacheKey)) {
+			console.log(`Fetched ${username}'s followers from cache`);
+			return this.cache.get(cacheKey);
+		}
+
+		console.log(`Queueing request to grab followers of ${username}`);
+		const friends = await new Promise((resolve, reject) => {
+			this.listThrottle(async () => {
+				try {
+					const result = await this.twit.get('followers/ids', { screen_name: username, count: 5000, stringify_ids: true });
+					resolve(result);
+				} catch (error) {
+					console.log(`Error fetching followers of ${username}`, error);
+					resolve({ ids: [] });
+				}
+			});
+		});
+
+		console.log(`Fetched ${friends.ids.length} who ${username} follows`);
+		this.cache.set(cacheKey, friends.ids);
+		return friends.ids;
+	}
+
 	async getFriends(username) {
 		const cacheKey = `${CACHE_KEY_PREFIXES.GET_FRIENDS_IDS}/${username}`;
 		if (!!this.cache.get(cacheKey)) {
@@ -37,7 +62,7 @@ export default class TwitterClient {
 			});
 		});
 
-		console.log(`Fetched ${friends.ids.length} who follow ${username}`);
+		console.log(`Fetched ${friends.ids.length} who ${username} follows`);
 		this.cache.set(cacheKey, friends.ids);
 		return friends.ids;
 	}

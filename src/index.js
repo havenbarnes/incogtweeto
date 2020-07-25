@@ -2,7 +2,7 @@ import TwitterClient from './twitter-client.js';
 
 const client = new TwitterClient();
 
-const getNLeastFollowedFriends = async (friends, N, maxFollowers) => {
+const getNLeastFollowed = async (friends, N, maxFollowers) => {
 	const userPromises = friends.map(async (id) => {
 		const user = await client.getUser(id);
 		return user;
@@ -26,7 +26,13 @@ const getPotentialRankingByIntersection = (friendsSet, potentialWinners) => {
 		};
 	});
 	let ranked = friendsWithRankings.sort((a, b) => b.intersectionSize - a.intersectionSize);
-	return ranked.map((f) => f.username);
+	ranked = ranked.filter((r) => r.intersectionSize > 0);
+	return ranked.map((f) => {
+		return {
+			username: f.username,
+			intersection: f.intersectionSize / friendsSet.size,
+		};
+	});
 };
 
 const main = async () => {
@@ -35,12 +41,12 @@ const main = async () => {
 	// Get everyone who <username> follows
 	const friends = await client.getFriends(username);
 	// Get the 10 least-followed people they follow
-	const specialFriends = await getNLeastFollowedFriends(friends, 10, 300);
+	const specialFriends = await getNLeastFollowed(friends, 10, 300);
 	let candidates = [...specialFriends];
-	// then grab nested special friends of these special friends, put them all in a big list together
+	// then grab nested special followers of these special friends, put them all in a big list together
 	for (const f of specialFriends) {
-		const fFriends = await client.getFriends(f.username);
-		const fSpecialFriends = await getNLeastFollowedFriends(fFriends, 10, 300);
+		const fFollowers = await client.getFollowers(f.username);
+		const fSpecialFriends = await getNLeastFollowed(fFollowers, 10, 300);
 		candidates = [...fSpecialFriends, ...candidates];
 	}
 
@@ -56,7 +62,13 @@ const main = async () => {
 	);
 
 	const potentialsRanked = getPotentialRankingByIntersection(new Set(friends), potentialWinners);
-	console.log(potentialsRanked);
+	let dedupedPotentials = Array.from(new Set(potentialsRanked));
+	dedupedPotentials = dedupedPotentials.filter((p) => p.username !== username);
+	console.log(
+		`\n\nPotential Real Identities of ${username} (in order of likelihood):\n${dedupedPotentials.map(
+			(p) => `\n${p.username} - intersection: ${(p.intersection * 100).toFixed(2)}%`,
+		)}`,
+	);
 };
 
 main();

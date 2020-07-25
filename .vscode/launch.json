@@ -11,7 +11,7 @@
 			"runtimeExecutable": "npm",
 			"skipFiles": ["<node_internals>/**"],
 			"env": {
-				"TWITTER_USER": "BootlickerAlert"
+				"TWITTER_USER": "cmac_11"
 			},
 			"type": "pwa-node"
 		}
